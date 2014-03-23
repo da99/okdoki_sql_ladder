@@ -7,9 +7,12 @@ Gem::Specification.new do |spec|
   spec.version       = `cat VERSION`
   spec.authors       = ["da99"]
   spec.email         = ["i-hate-spam-1234567@mailinator.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
+  spec.summary       = %q{A Ruby gem to generate SQL dealing with parent-child-grandchild records.}
   spec.description   = %q{
-    TODO: Write a longer description. Optional.
+    A gem that uses the i_dig_sql gem to generate SQL
+    strings. You can it an instance and it generates the
+    SQL to find its ancestors:
+    Example: page -> chapter -> book -> library
   }
   spec.homepage      = "https://github.com/da99/on_a_ladder"
   spec.license       = "MIT"

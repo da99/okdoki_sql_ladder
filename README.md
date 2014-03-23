@@ -1,7 +1,7 @@
 
-# On_A_Ladder
+# On\_A\_Ladder
 
-I have no idea.
+A Ruby gem to generate SQL dealing with parent-child-grandchild records.
 
 ## Installation
 
