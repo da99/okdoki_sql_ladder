@@ -17,12 +17,12 @@ end
 class C
 end
 
-def keys o
-  o.keys.sort { |a, b| return a.to_s > b.to_s }
+def keys k
+  k.map { |v| v[:class] }
 end
 
-def parents o
-  keys(o).map { |k| o[k][:parent] }
+def parents ladder
+  ladder.map { |k| k[:parent] }
 end
 
 describe ".Top" do
@@ -33,6 +33,14 @@ describe ".Top" do
     .Top(B)
 
     keys(o.Ladder).should == [A, B]
+  end
+
+  it "sets :parent to nil" do
+    o = On_A_Ladder.new
+    .Top(A)
+    .Top(B)
+
+    parents(o.Ladder).should == [nil, nil]
   end
 
 end # === describe on_a_ladder ===
@@ -54,7 +62,7 @@ describe ".Down" do
     .Down(B)
     .Down(C)
 
-    parents(o.Ladder).should == [nil, B, C]
+    parents(o.Ladder).should == [nil, A, B]
   end
 
 end # === describe .Down ===
