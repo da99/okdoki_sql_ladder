@@ -4,39 +4,35 @@ class On_A_Ladder
   class << self
   end # === class self ===
 
-  def initialize
-    @ladder = {}
-    @stack = []
+  def initialize sql
+    @ladder = []
+    @sql    = sql
   end
 
   def Ladder
-    @stack.map { |v|
-      @ladder[v]
-    }
+    @ladder
   end
 
-  def Top r
-    @ladder[r] = {
-      :class => r,
-      :child => nil,
-      :parent => nil
+  def Bottom r
+
+    @ladder = @ladder.concat(r.parent_sql)
+    @ladder << r
+    size = @ladder.size
+    @ladder.each_with_index { |v, i|
+      case i
+      when 0           # top
+      when size - 1    # bottom
+      else             # middle
+      end
     }
-    @stack << r
     self
   end
 
-  def Down r
-
-    @ladder[r] = {
-      :class => r,
-      :child => nil,
-      :parent => @stack.last
-    }
-
-    @ladder[@stack.last][:child] = r
-    @stack << r
-
-    self
+  def position
+    @ladder[0]
   end
 
 end # === class On_A_Ladder ===
+
+
+
