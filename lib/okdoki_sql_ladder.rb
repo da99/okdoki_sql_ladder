@@ -9,64 +9,65 @@ module Okdoki_Sql_Ladder
 
     # === Get parents array:
     sqls = o.parent_sql
+    i_dig_sql = I_Dig_Sql.new
 
     # === Turn parent array into sql array:
     About_Pos.Back(sqls) { |v, i, meta|
-      cte_table_name      = "#{o.class.to_s.downcase}_ladder_#{i}"
+      cte_table_name = meta[:cte_table_name] = "#{o.class.to_s.downcase}_ladder_#{i}" 
 
-      new_sql = case v
+      with_sql = case v
 
-                when I_Dig_Sql
-                  v.update_table_or_sql(cte_table_name)
+                 when I_Dig_Sql
+                   v.update_table_or_sql(cte_table_name)
 
-                when String
-                  I_Dig_Sql.new(v).update_table_or_sql(cte_table_name)
+                 when String
+                   I_Dig_Sql.new(v).update_table_or_sql(cte_table_name)
 
-                when Array
-                  klass = if meta.bottom?
-                            v.first.class
-                          else
-                            v.first
-                          end
-                  fkey = v[1] || 'parent_id'
+                 when Array
+                   klass = if meta.bottom?
+                             v.first.class
+                           else
+                             v.first
+                           end
+                   fkey = v[1] || 'parent_id'
 
-                  if meta.top? # TOP
-                    I_Dig_Sql.new("SELECT ? as class_id, id, NULL as parent_id
+                   if meta.top? # TOP
+                     I_Dig_Sql.new("SELECT ? as class_id, id, NULL as parent_id
                       FROM #{klass.table_name}
                       WHERE id in (SELECT parent_id FROM #{meta.prev[:cte_table_name]})", klass.class_id)
+                     .AS(cte_table_name)
 
-                  elsif meta.middle? # MIDDLE
-                    I_Dig_Sql.new("SELECT ? AS class_id, id, ? AS parent_id
+                   elsif meta.middle? # MIDDLE
+                     I_Dig_Sql.new("SELECT ? AS class_id, id, ? AS parent_id
                       FROM #{klass.table_name}
                       WHERE id IN ( SELECT parent_id FROM #{meta.prev[:cte_table_name]} )", klass.class_id, fkey)
+                     .AS(cte_table_name)
 
-                  else meta.bottom? # BOTTOM
-                    I_Dig_Sql.new("SELECT ? AS class_id, id, ? AS parent_id
+                   else meta.bottom? # BOTTOM
+                     I_Dig_Sql.new("SELECT ? AS class_id, id, ? AS parent_id
                       FROM #{klass.table_name}
                       WHERE id = ?", klass.class_id, fkey, o.id)
-                  end
-                else
-                  raise "Unknown type for sql: #{v.inspect}"
-                end
+                     .AS(cte_table_name)
+                   end
+                 else
+                   raise "Unknown type for sql: #{v.inspect}"
+                 end
 
-      raise "Unknown type: #{v.inspect}" unless new_sql
-
-      new_sql.tag_as(tag)
-      new_sql
+      i_dig_sql.WITH(with_sql).tag_as(tag)
     }
     # ---------------------------------------------------
 
-    self.WITH(
+    i_dig_sql.WITH(
       I_Dig_Sql.new(
-        sqls
+        i_dig_sql
         .find_tagged(tag)
         .map { |s| "SELECT * FROM #{s.AS}" }
-        .join("UNION")
+        .join("\nUNION\n")
       )
       .AS("#{o.class.to_s.downcase}_ladder_sql")
     )
 
-    self
+    i_dig_sql
   end
 
 end # === module Okdoki_Sql_Ladder ===
