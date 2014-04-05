@@ -11,7 +11,7 @@ def common o
   end
 end
 
-describe ".ladder" do
+describe ".ladder_sql" do
 
   it "turns an array of class/fkeys into an i_dig_sql" do
     class A
@@ -49,34 +49,34 @@ describe ".ladder" do
       end
     end
 
-    sql = C.new.ladder
+    sql = C.new.ladder_sql
     common(sql).should == common(%~
-WITH c_ladder_2 AS (
-  SELECT ? AS class_id, id, ? AS parent_id
-  FROM c
-  WHERE id = ?
-)
-,
-c_ladder_1 AS (
-  SELECT ? AS class_id, id, ? AS parent_id
-  FROM b
-  WHERE id IN ( SELECT parent_id FROM c_ladder_2 )
-)
-,
-c_ladder_0 AS (
-  SELECT ? as class_id, id, NULL as parent_id
-  FROM a
-  WHERE id in (SELECT parent_id FROM c_ladder_1)
-)
-,
-c_ladder_sql AS (
-  SELECT * FROM c_ladder_2
-    UNION
-  SELECT * FROM c_ladder_1
-    UNION
-  SELECT * FROM c_ladder_0
-)
-                                 ~)
+      WITH c_ladder_2 AS (
+        SELECT ? AS class_id, id, ? AS parent_id
+        FROM c
+        WHERE id = ?
+      )
+      ,
+      c_ladder_1 AS (
+        SELECT ? AS class_id, id, ? AS parent_id
+        FROM b
+        WHERE id IN ( SELECT parent_id FROM c_ladder_2 )
+      )
+      ,
+      c_ladder_0 AS (
+        SELECT ? as class_id, id, NULL as parent_id
+        FROM a
+        WHERE id in (SELECT parent_id FROM c_ladder_1)
+      )
+      ,
+      c_ladder_sql AS (
+        SELECT * FROM c_ladder_2
+          UNION
+        SELECT * FROM c_ladder_1
+          UNION
+        SELECT * FROM c_ladder_0
+      )
+    ~)
   end
 
 end # === describe okdoki_sql_ladder ===

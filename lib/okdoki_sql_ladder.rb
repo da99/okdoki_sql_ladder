@@ -3,7 +3,7 @@ require "about_pos"
 
 module Okdoki_Sql_Ladder
 
-  def ladder
+  def ladder_sql
     o = self
     tag = "#{o.class.to_s.downcase} ladder tag"
 
