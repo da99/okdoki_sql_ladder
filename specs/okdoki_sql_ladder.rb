@@ -1,87 +1,56 @@
+require "i_dig_sql"
 
-class A
-  class << self
-    def parent_sql sql
-      [I_Dig_Sql.new(%~
-       SELECT  ? AS class_id, id, NULL AS parent_id
-       FROM a
-       WHERE id IN ( SELECT parent_id FROM with_b )
-       ~, 1).AS('with_b')]
-    end
+def common o
+  case o
+  when I_Dig_Sql
+    common(o.to_sql[:sql])
+  else
+    o.split.join(" ")
   end
 end
 
-class B
-  class << self
-    def parent_sql sql
-      A.parent_sql.push I_Dig_Sql.new(%~
-        SELECT ? AS class_id, id, ? AS parent_id
-        FROM b
-        WHERE id IN ( SELECT parent_id FROM with_c )
-      ~, 2, 'a_id').AS("with_c")
-    end
-  end
-end
+describe ".ladder" do
 
-class B1
-  class << self
-    def parent
-      B
+  it "turns an array of class/fkeys into an i_dig_sql" do
+    class A
+      def class_id; 1; end
+      class << self
+        def table_name; "a"; end
+        def parent_sql child
+          [[self, nil]]
+        end
+      end # === class self ===
     end
-    def parent_id
-      :id
-    end
-  end
-end
 
-class B2
-  class << self
-    def parent
-      B1
-    end
-    def parent_id
-      :id
-    end
-  end
-end
+    class B
+      class << self
+        def table_name; "b"; end
+        def class_id; 2; end
+        def parent_sql child
+          A.parent_sql(self).push [self, "a_id"]
+        end
+      end # === class self ===
 
-class B3
-  class << self
-    def parent
-      B2
     end
-    def parent_id
-      :id
-    end
-  end
-end
 
-class C
-  class << self
-    def parent
-      B
+    class C
+      include Okdoki_Sql_Ladder
+      class << self
+        def table_name; "c"; end
+        def class_id; 3; end
+      end # === class self ===
+
+      def id; 1000; end
+
+      def parent_sql
+        B.parent_sql(self).push [self, 'b_id']
+      end
     end
-    def parent_id
-      :mid_id
-    end
+
+    sql = C.new.ladder
+    common(sql).should == common("WITH")
   end
 
-  def parent_sql
-    B.parent_sql.push I_Dig_Sql.new(
-      %~
-        SELECT ? AS class_id, ? AS id, ? AS parent_id
-      ~, 3, parent_id, id
-    ).AS('with_c')
-  end
-end
-
-def keys k
-  k.map { |v| v[:class] }
-end
-
-def parents ladder
-  ladder.map { |k| k[:parent] }
-end
-
+end # === describe okdoki_sql_ladder ===
 
 

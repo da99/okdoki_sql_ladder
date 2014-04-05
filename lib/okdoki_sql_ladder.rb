@@ -3,8 +3,8 @@ require "about_pos"
 
 module Okdoki_Sql_Ladder
 
-  def ladder o
-    s = self
+  def ladder
+    o = self
     tag = "#{o.class.to_s.downcase} ladder tag"
 
     # === Get parents array:
@@ -15,15 +15,22 @@ module Okdoki_Sql_Ladder
       cte_table_name      = "#{o.class.to_s.downcase}_ladder_#{i}"
 
       new_sql = case v
+
                 when I_Dig_Sql
                   v.update_table_or_sql(cte_table_name)
+
                 when String
                   I_Dig_Sql.new(v).update_table_or_sql(cte_table_name)
+
                 when Array
-                  klass = v.first
+                  klass = if meta.bottom?
+                            v.first.class
+                          else
+                            v.first
+                          end
                   fkey = v[1] || 'parent_id'
 
-                  if meta.first? # TOP
+                  if meta.top? # TOP
                     I_Dig_Sql.new("SELECT ? as class_id, id, NULL as parent_id
                       FROM #{klass.table_name}
                       WHERE id in (SELECT parent_id FROM #{meta.prev[:cte_table_name]})", klass.class_id)
