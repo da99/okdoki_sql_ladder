@@ -34,7 +34,7 @@ module Okdoki_Sql_Ladder
                    if meta.top? # TOP
                      I_Dig_Sql.new("SELECT ? as class_id, id, NULL as parent_id
                       FROM #{klass.table_name}
-                      WHERE id in (SELECT parent_id FROM #{meta.prev[:cte_table_name]})", klass.class_id)
+                      WHERE id in ( SELECT parent_id FROM #{meta.prev[:cte_table_name]} )", klass.class_id)
                      .AS(cte_table_name)
 
                    elsif meta.middle? # MIDDLE

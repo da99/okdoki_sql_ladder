@@ -66,7 +66,7 @@ describe ".ladder_sql" do
       c_ladder_0 AS (
         SELECT ? as class_id, id, NULL as parent_id
         FROM a
-        WHERE id in (SELECT parent_id FROM c_ladder_1)
+        WHERE id in ( SELECT parent_id FROM c_ladder_1 )
       )
       ,
       c_ladder_sql AS (
