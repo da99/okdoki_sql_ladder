@@ -1,4 +1,6 @@
 
+require "about_pos"
+
 module On_A_Ladder
 
   def ladder o
@@ -6,14 +8,10 @@ module On_A_Ladder
     tag = "#{o.class.to_s.downcase} ladder tag"
 
     # === Get parents array:
-    curr = o.parent_sql
-    sqls = [curr]
-    while (curr = curr.parent_sql) do
-      sqls.unshift curr
-    end
+    sqls = o.parent_sql
 
     # === Turn parent array into sql array:
-    About_Seq.Back(sqls) { |v, i, meta|
+    About_Pos.Back(sqls) { |v, i, meta|
       cte_table_name      = "#{o.class.to_s.downcase}_ladder_#{i}"
 
       new_sql = case v

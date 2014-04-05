@@ -1,4 +1,10 @@
 
+# Rename/Move:
+
+Renamed to: okdoki\_sql\_ladder
+
+Moved to: [https://github.com/da99/okdoki_sql_ladder](https://github.com/da99/okdoki_sql_ladder)
+
 # On\_A\_Ladder
 
 A Ruby gem to generate SQL dealing with parent-child-grandchild records.

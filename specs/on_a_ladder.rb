@@ -2,11 +2,11 @@
 class A
   class << self
     def parent_sql sql
-      sql << I_Dig_Sql.new(%~
+      [I_Dig_Sql.new(%~
        SELECT  ? AS class_id, id, NULL AS parent_id
        FROM a
        WHERE id IN ( SELECT parent_id FROM with_b )
-       ~, 1).AS('with_b')
+       ~, 1).AS('with_b')]
     end
   end
 end
@@ -14,12 +14,11 @@ end
 class B
   class << self
     def parent_sql sql
-      sql << I_Dig_Sql.new(%~
+      A.parent_sql.push I_Dig_Sql.new(%~
         SELECT ? AS class_id, id, ? AS parent_id
         FROM b
         WHERE id IN ( SELECT parent_id FROM with_c )
       ~, 2, 'a_id').AS("with_c")
-      A.parent_sql(sql)
     end
   end
 end
@@ -67,14 +66,12 @@ class C
     end
   end
 
-  def parent_sql sql
-    sql << I_Dig_Sql.new(
+  def parent_sql
+    B.parent_sql.push I_Dig_Sql.new(
       %~
         SELECT ? AS class_id, ? AS id, ? AS parent_id
       ~, 3, parent_id, id
     ).AS('with_c')
-
-    B.parent_sql(sql)
   end
 end
 
