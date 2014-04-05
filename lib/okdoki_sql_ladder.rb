@@ -1,7 +1,7 @@
 
 require "about_pos"
 
-module On_A_Ladder
+module Okdoki_Sql_Ladder
 
   def ladder o
     s = self
@@ -62,7 +62,7 @@ module On_A_Ladder
     self
   end
 
-end # === module On_A_Ladder ===
+end # === module Okdoki_Sql_Ladder ===
 
 
 

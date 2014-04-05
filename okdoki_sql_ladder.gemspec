@@ -3,7 +3,7 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
-  spec.name          = "on_a_ladder"
+  spec.name          = "okdoki_sql_ladder"
   spec.version       = `cat VERSION`
   spec.authors       = ["da99"]
   spec.email         = ["i-hate-spam-1234567@mailinator.com"]
@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
     SQL to find its ancestors:
     Example: page -> chapter -> book -> library
   }
-  spec.homepage      = "https://github.com/da99/on_a_ladder"
+  spec.homepage      = "https://github.com/da99/okdoki_sql_ladder"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
