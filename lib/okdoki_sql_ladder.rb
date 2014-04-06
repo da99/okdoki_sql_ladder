@@ -3,6 +3,9 @@ require "about_pos"
 
 module Okdoki_Sql_Ladder
 
+  Curr = Struct.new(:cte)
+  Prev = Struct.new(:cte)
+
   def ladder_sql
     o = self
     tag = "#{o.class.to_s.downcase} ladder tag"
@@ -17,11 +20,10 @@ module Okdoki_Sql_Ladder
 
       with_sql = case v
 
-                 when I_Dig_Sql
-                   v.update_table_or_sql(cte_table_name)
-
-                 when String
-                   I_Dig_Sql.new(v).update_table_or_sql(cte_table_name)
+                 when Proc
+                   v
+                   .call(Curr.new(cte_table_name), Prev.new(meta.prev? ? meta.prev[:cte_table_name] : nil))
+                   .AS(cte_table_name)
 
                  when Array
                    klass = if meta.bottom?

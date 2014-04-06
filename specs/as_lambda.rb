@@ -1,25 +1,18 @@
 require "i_dig_sql"
 
-def common o
-  case o
-  when I_Dig_Sql
-    common(o.to_sql[:sql])
-  else
-    o.strip.split("\n").map { |s|
-      s.strip.split.join(" ")
-    }.join("\n")
-  end
-end
+describe ".ladder with lambda params" do
 
-describe ".ladder_sql" do
-
-  it "turns an array of class/fkeys into an i_dig_sql" do
+  before do
     class A
       class << self
         def class_id; 1; end
         def table_name; "a"; end
         def parent_sql child
-          [[self, nil]]
+          [ ->(curr, prev) {
+            I_Dig_Sql.new("SELECT ? AS class_id, id, NULL AS parent_id
+                          FROM #{table_name}
+                          WHERE id IN ( SELECT parent_id FROM #{prev.cte} )", class_id)
+          } ]
         end
       end # === class self ===
     end
@@ -29,7 +22,15 @@ describe ".ladder_sql" do
         def class_id; 2; end
         def table_name; "b"; end
         def parent_sql child
-          A.parent_sql(self).push [self, "a_id"]
+          A.parent_sql(self).push ->(curr, prev) {
+            I_Dig_Sql.new(
+              %$
+              SELECT ? AS class_id, id, ? AS parent_id
+              FROM #{table_name}
+              WHERE id IN ( SELECT parent_id FROM #{prev.cte} )
+              $, "a_id"
+            )
+          }
         end
       end # === class self ===
 
@@ -45,28 +46,45 @@ describe ".ladder_sql" do
       def id; 1000; end
 
       def parent_sql
-        B.parent_sql(self).push [self, 'b_id']
+        B.parent_sql(self).push ->(curr, prev) {
+          [self, 'b_id']
+          I_Dig_Sql.new(%$
+            SELECT ? AS class_id, id, ? AS parent_id
+            FROM #{self.class.table_name}
+            WHERE id = ?
+          $, "b_id", id)
+        }
       end
     end
+  end # === before
+
+  it "turns an array of lambdas into an i_dig_sql" do
 
     sql = C.new.ladder_sql
+
+
+
     common(sql).should == common(%~
       WITH c_ladder_2 AS (
+
         SELECT ? AS class_id, id, ? AS parent_id
         FROM c
         WHERE id = ?
+
       )
       ,
       c_ladder_1 AS (
+
         SELECT ? AS class_id, id, ? AS parent_id
         FROM b
         WHERE id IN ( SELECT parent_id FROM c_ladder_2 )
+
       )
       ,
       c_ladder_0 AS (
-        SELECT ? as class_id, id, NULL as parent_id
+        SELECT ? AS class_id, id, NULL AS parent_id
         FROM a
-        WHERE id in ( SELECT parent_id FROM c_ladder_1 )
+        WHERE id IN ( SELECT parent_id FROM c_ladder_1 )
       )
       ,
       c_ladder_sql AS (
@@ -79,6 +97,4 @@ describe ".ladder_sql" do
     ~)
   end
 
-end # === describe okdoki_sql_ladder ===
-
-
+end # === describe .ladder with lambda params ===
