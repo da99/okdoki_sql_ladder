@@ -2,7 +2,9 @@
 describe ".ladder_sql with Array params" do
 
   before do
+
     class A
+
       class << self
         def class_id; 1; end
         def table_name; "a"; end
@@ -10,9 +12,11 @@ describe ".ladder_sql with Array params" do
           [[self, nil]]
         end
       end # === class self ===
+
     end
 
     class B
+
       class << self
         def class_id; 2; end
         def table_name; "b"; end
@@ -24,23 +28,25 @@ describe ".ladder_sql with Array params" do
     end
 
     class C
-      include Okdoki_Sql_Ladder
+
       class << self
         def class_id; 3; end
         def table_name; "c"; end
       end # === class self ===
 
-      def id; 1000; end
+      def id; 3; end
 
       def parent_sql
         B.parent_sql(self).push [self, 'b_id']
       end
+
     end
   end # === before
 
   it "turns an array of class/fkeys into an i_dig_sql" do
 
-    sql = C.new.ladder_sql
+    sql = Okdoki_Sql_Ladder(C.new)
+
     common(sql).should == common(%~
       WITH c_ladder_2 AS (
         SELECT ? AS class_id, id, ? AS parent_id

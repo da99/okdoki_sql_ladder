@@ -37,13 +37,12 @@ describe ".ladder with lambda params" do
     end
 
     class C
-      include Okdoki_Sql_Ladder
       class << self
         def class_id; 3; end
         def table_name; "c"; end
       end # === class self ===
 
-      def id; 1000; end
+      def id; 3; end
 
       def parent_sql
         B.parent_sql(self).push ->(curr, prev) {
@@ -60,9 +59,7 @@ describe ".ladder with lambda params" do
 
   it "turns an array of lambdas into an i_dig_sql" do
 
-    sql = C.new.ladder_sql
-
-
+    sql = Okdoki_Sql_Ladder(C.new)
 
     common(sql).should == common(%~
       WITH c_ladder_2 AS (
