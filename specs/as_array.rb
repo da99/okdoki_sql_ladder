@@ -76,6 +76,15 @@ describe ".ladder_sql with Array params" do
     ~)
   end
 
+  it "passes all args to final i_dig_sql return value" do
+    sql = Okdoki_Sql_Ladder(C.new)
+    args(sql).should == [
+      C.class_id, "b_id", C.new.id,
+      B.class_id, "a_id",
+      A.class_id
+    ]
+  end
+
 end # === describe .ladder with Array params ===
 
 

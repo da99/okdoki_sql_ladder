@@ -28,7 +28,7 @@ describe ".ladder with lambda params" do
               SELECT ? AS class_id, id, ? AS parent_id
               FROM #{table_name}
               WHERE id IN ( SELECT parent_id FROM #{prev.cte} )
-              $, "a_id"
+              $, class_id, "a_id"
             )
           }
         end
@@ -45,13 +45,13 @@ describe ".ladder with lambda params" do
       def id; 3; end
 
       def parent_sql
+        me = self
         B.parent_sql(self).push ->(curr, prev) {
-          [self, 'b_id']
           I_Dig_Sql.new(%$
             SELECT ? AS class_id, id, ? AS parent_id
             FROM #{self.class.table_name}
             WHERE id = ?
-          $, "b_id", id)
+          $, me.class.class_id, "b_id", id)
         }
       end
     end
@@ -92,6 +92,15 @@ describe ".ladder with lambda params" do
         SELECT * FROM c_ladder_0
       )
     ~)
+  end
+
+  it "passes the proper args to the final i_dig_sql value" do
+    sql = Okdoki_Sql_Ladder(C.new)
+    args(sql).should == [
+      C.class_id, "b_id", C.new.id,
+      B.class_id, "a_id",
+      A.class_id
+    ]
   end
 
 end # === describe .ladder with lambda params ===

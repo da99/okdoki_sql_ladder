@@ -12,6 +12,10 @@ def diff actual, target
   Diffy::Diff.new(actual, target)
 end
 
+def args o
+  o.to_sql[:args]
+end
+
 def common o
   case o
   when I_Dig_Sql
