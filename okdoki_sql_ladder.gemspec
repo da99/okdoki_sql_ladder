@@ -22,8 +22,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "about_pos", "~> 0.1"
-  spec.add_dependency "i_dig_sql", "~> 0.1"
+  spec.add_runtime_dependency "about_pos", "~> 0.1"
+  spec.add_runtime_dependency "i_dig_sql", "~> 0.1"
 
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
